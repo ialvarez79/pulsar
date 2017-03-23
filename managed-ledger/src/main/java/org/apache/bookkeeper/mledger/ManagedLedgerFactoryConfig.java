@@ -21,7 +21,7 @@ public class ManagedLedgerFactoryConfig {
     private long maxCacheSize = 128 * MB;
     private double cacheEvictionWatermark = 0.90;
 
-    private boolean useProtobufBinaryFormatInZK = false;
+    private boolean useProtobufBinaryFormatInZK = true;
 
     public long getMaxCacheSize() {
         return maxCacheSize;
