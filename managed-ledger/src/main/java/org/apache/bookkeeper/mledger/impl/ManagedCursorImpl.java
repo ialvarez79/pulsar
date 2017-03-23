@@ -762,7 +762,7 @@ public class ManagedCursorImpl implements ManagedCursor {
 
         };
 
-        if (cursorLedger == null) {
+        if (cursorLedger == null || STATE_UPDATER.get(this) == State.NoLedger) {
             persistPositionMetaStore(-1, newPosition, new MetaStoreCallback<Void>() {
                 @Override
                 public void operationComplete(Void result, Stat stat) {
