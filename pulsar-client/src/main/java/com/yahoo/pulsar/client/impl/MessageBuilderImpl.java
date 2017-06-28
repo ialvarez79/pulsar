@@ -33,10 +33,6 @@ public class MessageBuilderImpl implements MessageBuilder {
 
     @Override
     public Message build() {
-        if (content.remaining() > PulsarDecoder.MaxMessageSize) {
-            throw new IllegalArgumentException(
-                    "Message payload cannot exceed " + PulsarDecoder.MaxMessageSize + " bytes");
-        }
         return MessageImpl.create(msgMetadataBuilder, content);
     }
 
