@@ -95,7 +95,7 @@ public class MetaStoreImplZookeeper implements MetaStore {
     }
 
     public MetaStoreImplZookeeper(ZooKeeper zk, OrderedSafeExecutor executor) throws Exception {
-        this(zk, ZNodeProtobufFormat.Text, executor);
+        this(zk, ZNodeProtobufFormat.Binary, executor);
     }
 
     public MetaStoreImplZookeeper(ZooKeeper zk, ZNodeProtobufFormat protobufFormat, OrderedSafeExecutor executor)
