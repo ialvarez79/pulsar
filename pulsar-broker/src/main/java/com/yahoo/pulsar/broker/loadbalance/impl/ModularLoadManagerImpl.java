@@ -59,6 +59,7 @@ import com.yahoo.pulsar.zookeeper.ZooKeeperCache.Deserializer;
 import com.yahoo.pulsar.zookeeper.ZooKeeperCacheListener;
 import com.yahoo.pulsar.zookeeper.ZooKeeperChildrenCache;
 import com.yahoo.pulsar.zookeeper.ZooKeeperDataCache;
+import org.apache.zookeeper.KeeperException.NoNodeException;
 
 import io.netty.util.concurrent.DefaultThreadFactory;
 
@@ -271,7 +272,7 @@ public class ModularLoadManagerImpl implements ModularLoadManager, ZooKeeperCach
         }
     }
 
-    private Set<String> getAvailableBrokers() {
+    public Set<String> getAvailableBrokers() {
         try {
             return availableActiveBrokers.get();
         } catch (Exception e) {
@@ -398,6 +399,11 @@ public class ModularLoadManagerImpl implements ModularLoadManager, ZooKeeperCach
                     // brokers.
                     brokerDataMap.put(broker, new BrokerData(localData));
                 }
+            } catch (NoNodeException ne) {
+                // it only happens if we update-brokerData before availableBrokerCache refreshed with latest data and
+                // broker's delete-znode watch-event hasn't updated availableBrokerCache
+                brokerDataMap.remove(broker);
+                log.warn("[{}] broker load-report znode not present", broker, ne);
             } catch (Exception e) {
                 log.warn("Error reading broker data from cache for broker - [{}], [{}]", broker, e.getMessage());
             }
