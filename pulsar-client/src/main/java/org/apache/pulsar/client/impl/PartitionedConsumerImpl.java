@@ -32,7 +32,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.ConsumerConfiguration;
 import org.apache.pulsar.client.api.Message;
@@ -86,13 +85,13 @@ public class PartitionedConsumerImpl extends ConsumerBase {
     }
 
     private void start() {
-        AtomicReference<Throwable> subscribeFail = new AtomicReference<Throwable>();
+        AtomicReference<Throwable> subscribeFail = new AtomicReference<>();
         AtomicInteger completed = new AtomicInteger();
         ConsumerConfiguration internalConfig = getInternalConsumerConfig();
         for (int partitionIndex = 0; partitionIndex < numPartitions; partitionIndex++) {
             String partitionName = DestinationName.get(topic).getPartition(partitionIndex).toString();
             ConsumerImpl consumer = new ConsumerImpl(client, partitionName, subscription, internalConfig,
-                    client.externalExecutorProvider().getExecutor(), partitionIndex, new CompletableFuture<Consumer>());
+                    client.eventLoopGroup().next(), partitionIndex, new CompletableFuture<>());
             consumers.add(consumer);
             consumer.subscribeFuture().handle((cons, subscribeException) -> {
                 if (subscribeException != null) {
@@ -263,7 +262,7 @@ public class PartitionedConsumerImpl extends ConsumerBase {
         }
         setState(State.Closing);
 
-        AtomicReference<Throwable> unsubscribeFail = new AtomicReference<Throwable>();
+        AtomicReference<Throwable> unsubscribeFail = new AtomicReference<>();
         AtomicInteger completed = new AtomicInteger(numPartitions);
         CompletableFuture<Void> unsubscribeFuture = new CompletableFuture<>();
         for (Consumer consumer : consumers) {
@@ -303,7 +302,7 @@ public class PartitionedConsumerImpl extends ConsumerBase {
         }
         setState(State.Closing);
 
-        AtomicReference<Throwable> closeFail = new AtomicReference<Throwable>();
+        AtomicReference<Throwable> closeFail = new AtomicReference<>();
         AtomicInteger completed = new AtomicInteger(numPartitions);
         CompletableFuture<Void> closeFuture = new CompletableFuture<>();
         for (Consumer consumer : consumers) {
