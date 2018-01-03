@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import io.netty.channel.EventLoopGroup;
 import org.apache.pulsar.client.api.PulsarClientException.UnsupportedAuthenticationException;
 import org.apache.pulsar.client.impl.auth.AuthenticationDisabled;
 
@@ -193,6 +194,10 @@ public class ClientConfiguration implements Serializable {
 
     /**
      * Set the number of threads to be used for message listeners <i>(default: 1 thread)</i>
+     * <p>
+     * Setting this to <i>0</i> makes client use {@link EventLoopGroup} as a scheduler. <b>It is extremely important not
+     * run blocking operations when using this, it will potentially slow down the consumption for other consumers in
+     * the same client</b>
      *
      * @param numListenerThreads
      */

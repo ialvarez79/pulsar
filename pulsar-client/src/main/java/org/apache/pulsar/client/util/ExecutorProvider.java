@@ -28,28 +28,38 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.collect.Lists;
 
+import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
 public class ExecutorProvider {
     private final int numThreads;
     private final List<ExecutorService> executors;
     private final AtomicInteger currentThread = new AtomicInteger(0);
+    private final EventLoopGroup eventLoopGroup;
 
-    public ExecutorProvider(int numThreads, String threadNamePrefix) {
-        checkArgument(numThreads > 0);
+    public ExecutorProvider(EventLoopGroup eventLoopGroup, int numThreads, String threadNamePrefix) {
+        checkArgument(numThreads >= 0);
+        this.eventLoopGroup = eventLoopGroup;
         this.numThreads = numThreads;
-        checkNotNull(threadNamePrefix);
-        executors = Lists.newArrayListWithCapacity(numThreads);
-        for (int i = 0; i < numThreads; i++) {
-            executors.add(Executors.newSingleThreadExecutor(new DefaultThreadFactory(threadNamePrefix)));
+        this.executors = Lists.newArrayListWithCapacity(numThreads);
+        if (numThreads == 0) {
+            checkNotNull(eventLoopGroup);
+        } else {
+            checkNotNull(threadNamePrefix);
+            for (int i = 0; i < numThreads; i++) {
+                executors.add(Executors.newSingleThreadExecutor(new DefaultThreadFactory(threadNamePrefix)));
+            }
         }
     }
 
     public ExecutorService getExecutor() {
+        if (numThreads == 0) {
+            return eventLoopGroup.next();
+        }
         return executors.get((currentThread.getAndIncrement() & Integer.MAX_VALUE) % numThreads);
     }
 
     public void shutdownNow() {
-        executors.forEach(executor -> executor.shutdownNow());
+        executors.forEach(ExecutorService::shutdownNow);
     }
 }

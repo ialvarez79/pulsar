@@ -99,7 +99,7 @@ public class PulsarClientImpl implements PulsarClient {
             lookup = new BinaryProtoLookupService(this, serviceUrl, conf.isUseTls());
         }
         timer = new HashedWheelTimer(new DefaultThreadFactory("pulsar-timer"), 1, TimeUnit.MILLISECONDS);
-        externalExecutorProvider = new ExecutorProvider(conf.getListenerThreads(), "pulsar-external-listener");
+        externalExecutorProvider = new ExecutorProvider(eventLoopGroup, conf.getListenerThreads(), "pulsar-external-listener");
         producers = Maps.newIdentityHashMap();
         consumers = Maps.newIdentityHashMap();
         state.set(State.Open);
