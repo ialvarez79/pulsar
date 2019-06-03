@@ -28,6 +28,8 @@ import org.apache.pulsar.policies.data.loadbalancer.NamespaceBundleStats;
 import org.apache.pulsar.policies.data.loadbalancer.ResourceUsage;
 import org.apache.pulsar.policies.data.loadbalancer.ServiceLookupData;
 import org.apache.pulsar.policies.data.loadbalancer.SystemResourceUsage;
+import com.google.common.collect.Maps;
+
 
 /**
  * Contains all the data that is maintained locally on each broker.
@@ -93,7 +95,7 @@ public class LocalBrokerData extends JSONWritable implements ServiceLookupData {
         this.webServiceUrlTls = webServiceUrlTls;
         this.pulsarServiceUrl = pulsarServiceUrl;
         this.pulsarServiceUrlTls = pulsarServiceUrlTls;
-        lastStats = new HashMap<>();
+        lastStats = Maps.newConcurrentMap();
         lastUpdate = System.currentTimeMillis();
         cpu = new ResourceUsage();
         memory = new ResourceUsage();
